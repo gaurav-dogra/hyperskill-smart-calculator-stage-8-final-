@@ -1,10 +1,11 @@
 package ExpressionBuster;
 
 import java.util.*;
+import java.math.BigInteger;
 
 public class Expression {
 
-    private final Map<String, Integer> mapOfVariables;
+    private final Map<String, BigInteger> mapOfVariables;
     private final Deque<String> postfix;
     private static final String INVALID_IDENTIFIER = "Invalid identifier";
     private static final String INVALID_ASSIGNMENT = "Invalid assignment";
@@ -36,8 +37,8 @@ public class Expression {
         }
 
         // if input is an integer or a known variable
-        if (integerValueOf(expression) != null) {
-            return integerValueOf(expression) + "";
+        if (bigIntegerValueOf(expression) != null) {
+            return bigIntegerValueOf(expression) + "";
         } else if (expression.matches("[a-zA-Z]+")) { // legit variable name but not in map
             return UNKNOWN_VARIABLE;
         }
@@ -46,52 +47,52 @@ public class Expression {
             return INVALID_EXPRESSION;
         }
 
-        if (!convertToPostfix(expression)) {
-            return null; // return null on error
+        if (!convertToPostfix(expression)) { // return null on error
+            return "Invalid assignment";
         }
 
         return computePostfix();
     }
 
     private String computePostfix() {
-        Deque<Integer> deque = new ArrayDeque<>();
+        Deque<BigInteger> deque = new ArrayDeque<>();
         //System.out.println("postfix = " + postfix);
         for (String token : postfix) {
             if (token.matches("[+\\-*^/]")) {
-                Integer valueTwo = deque.removeLast();
-                Integer valueOne = deque.removeLast();
+                BigInteger valueTwo = deque.removeLast();
+                BigInteger valueOne = deque.removeLast();
 
                 switch (token) {
                     case "+":
-                        deque.add(valueOne + valueTwo);
+                        deque.add(valueOne.add(valueTwo));
                         break;
                     case "-":
-                        deque.add(valueOne - valueTwo);
+                        deque.add(valueOne.subtract(valueTwo));
                         break;
                     case "*":
-                        deque.add(valueOne * valueTwo);
+                        deque.add(valueOne.multiply(valueTwo));
                         break;
                     case "/":
-                        deque.add(valueOne / valueTwo);
+                        deque.add(valueOne.divide(valueTwo));
                         break;
                     case "^":
-                        deque.add((int)Math.pow(valueOne, valueTwo));
+                        deque.add(valueOne.pow(valueTwo.intValue()));
                         break;
                 }
             } else {
-                deque.add(integerValueOf(token));
+                deque.add(bigIntegerValueOf(token));
             }
         }
         postfix.clear();
         return deque.removeLast()+"";
     }
 
-    private Integer integerValueOf(String rightSide) {
+    private BigInteger bigIntegerValueOf(String rightSide) {
         if (mapOfVariables.get(rightSide) != null) {
             return mapOfVariables.get(rightSide);
         } else {
             try {
-                return Integer.parseInt(rightSide);
+                return new BigInteger(rightSide);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -106,7 +107,7 @@ public class Expression {
         if (!leftSide.matches("[A-Za-z]+")) {
             return INVALID_IDENTIFIER;
         }
-        // if correct variable name but not in map, and not an Integer
+        // if rightSide is correct variable name but not in map, and not an Integer
         if(rightSide.matches("[A-Za-z]+") && !checkMap(rightSide) && !isInteger(rightSide)) {
             return UNKNOWN_VARIABLE;
         }
@@ -116,21 +117,21 @@ public class Expression {
             Expression rightSideAsExpression = new Expression();
             String result = rightSideAsExpression.compute(rightSide);
             try {
-                Integer.parseInt(result);
+                new BigInteger(result);
                 rightSide = result;
             } catch (NumberFormatException e) {
                 return INVALID_ASSIGNMENT;
             }
         }
 
-        mapOfVariables.put(leftSide, integerValueOf(rightSide));
+        mapOfVariables.put(leftSide, bigIntegerValueOf(rightSide));
         return null; // return null if all is well
 
     }
 
     private boolean isInteger(String rightSide) {
         try {
-            Integer.parseInt(rightSide);
+            new BigInteger(rightSide);
         } catch (NumberFormatException e) {
             return false;
         }
@@ -142,7 +143,6 @@ public class Expression {
     }
 
     private boolean convertToPostfix(String inputExpression) {
-
         String expression = inputExpression.replaceAll("\\s+", "");
         // split the expression on delimiters +, -, /, *, ^, (, ), the results also keep the delimiter
         // e.g. (a + b) * c is { (, a, +, b, ), *, c }

@@ -38,7 +38,8 @@ public class ExpressionTest {
                 {"n = a2a", "Invalid assignment"},
                 {"a = 7 = 8", "Invalid assignment"},
                 {"e", "Unknown variable"},
-                {"c = 10 + 5", null}
+                {"c = 10 + 5", null},
+                {"112234567890 + 112234567890 * (10000000999 - 999)", "1122345679012234567890"}
                 // I don't know how to test the below
                 //                a=4
                 //                b=5

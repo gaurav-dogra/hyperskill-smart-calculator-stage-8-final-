@@ -18,7 +18,7 @@ class Main {
                     System.out.println("Bye!");
                     break label;
                 case "/help":
-                    System.out.println("this application supports variables, brackets, addition, subtraction, multiplication" +
+                    System.out.println("this application supports BigInteger values, variables, brackets, addition, subtraction, multiplication" +
                             "division and power");
                     break;
                 default:
